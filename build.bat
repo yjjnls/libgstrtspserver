@@ -4,6 +4,11 @@ set GSTREAMER_ROOT=C:/gstreamer/1.0/x86_64/
 
 REM rd /s/q build
 
+REM pushd src
+REM git am --abort
+REM git am ../patch/0001-add-property-to-set-sync-false-and-close-session.patch
+REM popd
+
 mkdir build
 pushd build
 
