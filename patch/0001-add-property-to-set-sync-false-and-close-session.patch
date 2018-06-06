@@ -1,15 +1,15 @@
-From 2685cafb53f91d38f2d9da26f7cff692e89d0b67 Mon Sep 17 00:00:00 2001
+From e646fef14cfa9181149843a02dc0344615d658ac Mon Sep 17 00:00:00 2001
 From: yuanjunjie <yuanjunjie@kedacom.com>
-Date: Wed, 23 May 2018 19:24:39 +0800
+Date: Wed, 6 Jun 2018 09:27:49 +0800
 Subject: [PATCH] add property to set sync false and close session
 
 ---
- gst/rtsp-server/rtsp-client.c | 72 ++++++++++++++++++++++++++++++++++++++++---
+ gst/rtsp-server/rtsp-client.c | 73 ++++++++++++++++++++++++++++++++++++++++---
  gst/rtsp-server/rtsp-stream.c | 39 ++++++++++++++++++++---
- 2 files changed, 103 insertions(+), 8 deletions(-)
+ 2 files changed, 104 insertions(+), 8 deletions(-)
 
 diff --git a/gst/rtsp-server/rtsp-client.c b/gst/rtsp-server/rtsp-client.c
-index 9df4c9b..25a8fe6 100644
+index 9df4c9b..f8c948c 100644
 --- a/gst/rtsp-server/rtsp-client.c
 +++ b/gst/rtsp-server/rtsp-client.c
 @@ -110,6 +110,7 @@ static GHashTable *tunnels;     /* protected by tunnels_lock */
@@ -64,18 +64,19 @@ index 9df4c9b..25a8fe6 100644
  
    /* all sessions should have been removed by now. We keep a ref to
     * the client object for the session removed handler. The ref is
-@@ -792,6 +809,10 @@ gst_rtsp_client_get_property (GObject * object, guint propid,
+@@ -792,6 +809,11 @@ gst_rtsp_client_get_property (GObject * object, guint propid,
      case PROP_DROP_BACKLOG:
        g_value_set_boolean (value, priv->drop_backlog);
        break;
-+    case PROP_PATH:
++    case PROP_PATH: {
 +      gchar *result = g_strdup_printf ("%s", priv->path);
 +      g_value_take_string (value, result);
++    }
 +      break;
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, propid, pspec);
    }
-@@ -816,6 +837,12 @@ gst_rtsp_client_set_property (GObject * object, guint propid,
+@@ -816,6 +838,12 @@ gst_rtsp_client_set_property (GObject * object, guint propid,
        priv->drop_backlog = g_value_get_boolean (value);
        g_mutex_unlock (&priv->lock);
        break;
@@ -88,7 +89,7 @@ index 9df4c9b..25a8fe6 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, propid, pspec);
    }
-@@ -1115,8 +1142,10 @@ gst_rtsp_client_close (GstRTSPClient * client)
+@@ -1115,8 +1143,10 @@ gst_rtsp_client_close (GstRTSPClient * client)
      g_source_destroy ((GSource *) priv->watch);
      priv->watch = NULL;
      gst_rtsp_client_set_send_func (client, NULL, NULL, NULL);
@@ -101,7 +102,7 @@ index 9df4c9b..25a8fe6 100644
    }
  }
  
-@@ -4265,6 +4294,41 @@ gst_rtsp_client_send_message (GstRTSPClient * client, GstRTSPSession * session,
+@@ -4265,6 +4295,41 @@ gst_rtsp_client_send_message (GstRTSPClient * client, GstRTSPSession * session,
    return GST_RTSP_OK;
  }
  
