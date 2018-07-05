@@ -57,7 +57,9 @@ ADD_DEFINITIONS( -DPACKAGE="gst-plugins-bad"  )
 ADD_DEFINITIONS( -DGST_PACKAGE_NAME="GStreamer Bad Plug-ins source release"  )
 ADD_DEFINITIONS( -DGST_PACKAGE_ORIGIN="Unknown package origin"  )
 
+set(instd ${CMAKE_HOME_DIRECTORY}/../out)
+
 install(TARGETS gstrtspserver-1.0
-		RUNTIME DESTINATION $ENV{GSTREAMER_ROOT}/bin
-		LIBRARY DESTINATION $ENV{GSTREAMER_ROOT}/lib
+		RUNTIME DESTINATION ${instd}/bin
+		LIBRARY DESTINATION ${instd}/lib
         )
