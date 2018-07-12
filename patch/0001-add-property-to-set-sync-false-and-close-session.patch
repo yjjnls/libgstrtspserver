@@ -1,15 +1,15 @@
-From a7b7d6bf2d990ffb0e136347d9dc5dfc977c56cc Mon Sep 17 00:00:00 2001
-From: yuanjunjie <yanjunjie@kedacom.com>
-Date: Tue, 19 Jun 2018 19:33:29 +0800
+From 1519c0393937ca338c088934f7dd53f4943b89a6 Mon Sep 17 00:00:00 2001
+From: yjjnls <x-jj@foxmail.com>
+Date: Thu, 12 Jul 2018 14:17:42 +0800
 Subject: [PATCH] add property to set sync false and close session
 
 ---
- gst/rtsp-server/rtsp-client.c | 75 ++++++++++++++++++++++++++++++++++++++++---
- gst/rtsp-server/rtsp-stream.c | 39 +++++++++++++++++++---
- 2 files changed, 106 insertions(+), 8 deletions(-)
+ gst/rtsp-server/rtsp-client.c | 73 ++++++++++++++++++++++++++++++++++++++++---
+ gst/rtsp-server/rtsp-stream.c | 39 ++++++++++++++++++++---
+ 2 files changed, 104 insertions(+), 8 deletions(-)
 
 diff --git a/gst/rtsp-server/rtsp-client.c b/gst/rtsp-server/rtsp-client.c
-index 9df4c9b..db6e7ab 100644
+index 9df4c9b..ca98212 100644
 --- a/gst/rtsp-server/rtsp-client.c
 +++ b/gst/rtsp-server/rtsp-client.c
 @@ -110,6 +110,7 @@ static GHashTable *tunnels;     /* protected by tunnels_lock */
@@ -102,23 +102,14 @@ index 9df4c9b..db6e7ab 100644
    }
  }
  
-@@ -4265,6 +4295,43 @@ gst_rtsp_client_send_message (GstRTSPClient * client, GstRTSPSession * session,
+@@ -4265,6 +4295,41 @@ gst_rtsp_client_send_message (GstRTSPClient * client, GstRTSPSession * session,
    return GST_RTSP_OK;
  }
  
-+
-+// static char * 
-+// client_get_path (GstRTSPClient *client)
-+// {
-+//     GstRTSPClientPrivate *priv = client->priv;
-+//     gchar *result;
-+//     result = g_strdup_printf ("%s", priv->path);
-+//     return result;
-+// }
-+
 +gboolean
 +gst_rtsp_client_teardown_actively (GstRTSPClient *client, gchar *path, GstRTSPSession *session)
 +{
++    GST_DEBUG ("[rtsp-client] gst_rtsp_client_teardown_actively");
 +    GstRTSPClientPrivate *priv = client->priv;
 +    // GstRTSPSession *session = gst_rtsp_session_pool_find (priv->session_pool, sessid);
 +    // if (!session)
@@ -127,17 +118,24 @@ index 9df4c9b..db6e7ab 100644
 +
 +    gint matched;
 +    GstRTSPSessionMedia *sessmedia = gst_rtsp_session_get_media (session, path, &matched);
++    GST_DEBUG ("[rtsp-client] gst_rtsp_session_get_media");
 +    if (sessmedia) {
 +        if(GST_IS_RTSP_MEDIA(sessmedia)) {
++          GST_DEBUG ("[rtsp-client] GST_IS_RTSP_MEDIA");
 +          gst_rtsp_session_media_set_state (sessmedia, GST_STATE_NULL);
++          GST_DEBUG ("[rtsp-client] gst_rtsp_session_media_set_state");
 +          gboolean keep_session = gst_rtsp_session_release_media (session, sessmedia);
++          GST_DEBUG ("[rtsp-client] gst_rtsp_session_release_media");
 +          if (!keep_session) {
 +              /* remove the session */
++              GST_DEBUG ("[rtsp-client] keep_session");
 +              gst_rtsp_session_pool_remove (priv->session_pool, session);
++              GST_DEBUG ("[rtsp-client] gst_rtsp_session_pool_remove");
 +          }
 +        }
++        GST_DEBUG ("[rtsp-client] start gst_rtsp_client_close");
 +        gst_rtsp_client_close (client);
-+        GST_FIXME ("rtsp-client close the connection actively!");
++        GST_FIXME ("[rtsp-client] close the connection actively!");
 +        return TRUE;
 +    }
 +    return FALSE;
@@ -265,5 +263,5 @@ index 45b6238..459f1b2 100644
        gst_app_sink_set_callbacks (GST_APP_SINK_CAST (priv->appsink[i]),
            &sink_cb, stream, NULL);
 -- 
-2.7.4
+2.13.0.windows.1
 
